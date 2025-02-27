@@ -1,36 +1,82 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Table Football Tracker
 
-## Getting Started
+Une application web moderne pour suivre les performances des joueurs de baby-foot, développée avec Next.js, Prisma et TypeScript.
 
-First, run the development server:
+## 🌟 Fonctionnalités
 
+- 📊 Tableau de bord avec statistiques des joueurs
+- 👥 Gestion des joueurs (ajout, modification, suppression)
+- 🏆 Système de classement
+- ✍️ Enregistrement des scores avec système de "congo"
+- 📱 Interface responsive et moderne
+- 🔄 Réinitialisation des scores
+
+## 🚀 Installation
+
+1. Clonez le dépôt :
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/Maxencezini/table-football-tracker.git
+cd table-football-tracker
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Installez les dépendances :
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configurez la base de données :
+```bash
+npx prisma generate
+npx prisma db push
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Lancez l'application en mode développement :
+```bash
+npm run dev
+```
 
-## Learn More
+L'application sera accessible à l'adresse [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+## 💻 Technologies utilisées
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Next.js](https://nextjs.org/) - Framework React
+- [TypeScript](https://www.typescriptlang.org/) - Typage statique
+- [Prisma](https://www.prisma.io/) - ORM pour la base de données
+- [Tailwind CSS](https://tailwindcss.com/) - Framework CSS
+- [SQLite](https://www.sqlite.org/) - Base de données
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📝 Structure du projet
 
-## Deploy on Vercel
+```
+src/
+├── app/                    # Pages et routes de l'application
+├── components/            # Composants réutilisables
+├── contexts/             # Contextes React (gestion d'état)
+├── lib/                  # Utilitaires et configurations
+└── assets/              # Ressources statiques
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🛠️ Fonctionnalités principales
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Gestion des joueurs
+- Ajout de nouveaux joueurs avec pseudo, surnom et avatar
+- Modification des informations des joueurs
+- Suppression de joueurs
+
+### Système de score
+- Enregistrement des victoires/défaites
+- Système de "congo" (0 ou 1)
+- Calcul automatique des ratios et points
+
+### Classement
+- Classement dynamique basé sur les points
+- Mise en évidence des trois premiers
+- Statistiques détaillées par joueur
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
