@@ -2,6 +2,12 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
+interface Score {
+  isVictory: boolean
+  congo: number
+  passage: number
+}
+
 interface Player {
   id: number
   pseudo: string
@@ -12,31 +18,42 @@ interface Player {
   ratio: number
   points: number
   congo: number
+  passage: number
+  scores?: Score[]
 }
 
 interface PlayersContextType {
   players: Player[]
   loading: boolean
   refreshPlayers: () => Promise<void>
-  addScore: (data: { playerId: number; isVictory: boolean; congo: number }) => Promise<void>
+  addScore: (data: { playerId: number; isVictory: boolean; congo: number; passage: number }) => Promise<void>
   addPlayer: (data: { pseudo: string; nickname?: string; avatar?: string }) => Promise<void>
   deletePlayer: (playerId: number) => Promise<void>
   resetScores: () => Promise<void>
+  updatePlayerStats: (playerId: number, data: { victories: number; defeats: number; congo: number; passage: number }) => Promise<void>
 }
 
 const PlayersContext = createContext<PlayersContextType | undefined>(undefined)
 
 function formatPlayerData(player: any): Player {
+  const victories = player.scores?.filter((score: Score) => score.isVictory).length || 0
+  const totalGames = player.scores?.length || 0
+  const ratio = totalGames > 0 ? victories / totalGames : 0
+  const points = (victories * 3) + (totalGames - victories)
+  const congo = player.scores?.reduce((total: number, score: Score) => total + score.congo, 0) || 0
+  const passage = player.scores?.reduce((total: number, score: Score) => total + score.passage, 0) || 0
+
   return {
     id: player.id,
     pseudo: player.pseudo || '',
     nickname: player.nickname || null,
     avatar: player.avatar || '/default-avatar.png',
-    victories: player.victories || 0,
-    defeats: player.defeats || 0,
-    ratio: player.ratio || 0,
-    points: player.points || 0,
-    congo: player.congo || 0,
+    victories,
+    defeats: totalGames - victories,
+    ratio,
+    points,
+    congo,
+    passage,
   }
 }
 
@@ -57,7 +74,7 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  const addScore = async (data: { playerId: number; isVictory: boolean; congo: number }) => {
+  const addScore = async (data: { playerId: number; isVictory: boolean; congo: number; passage: number }) => {
     try {
       const response = await fetch('/api/scores', {
         method: 'POST',
@@ -68,12 +85,16 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
       })
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'ajout du score')
+        const errorData = await response.json()
+        console.error('Réponse de l\'API:', errorData)
+        throw new Error(errorData.error || 'Erreur lors de l\'ajout du score')
       }
 
+      const result = await response.json()
+      console.log('Score ajouté avec succès:', result)
       await refreshPlayers()
     } catch (error) {
-      console.error('Erreur:', error)
+      console.error('Erreur détaillée:', error)
       throw error
     }
   }
@@ -133,6 +154,30 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  const updatePlayerStats = async (playerId: number, data: { victories: number; defeats: number; congo: number; passage: number }) => {
+    try {
+      const response = await fetch(`/api/players/${playerId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.details || errorData.error || 'Erreur lors de la mise à jour des statistiques')
+      }
+
+      const result = await response.json()
+      console.log('Mise à jour réussie:', result)
+      await refreshPlayers()
+    } catch (error) {
+      console.error('Erreur détaillée:', error)
+      throw error
+    }
+  }
+
   useEffect(() => {
     refreshPlayers()
   }, [])
@@ -147,6 +192,7 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
         addPlayer,
         deletePlayer,
         resetScores,
+        updatePlayerStats,
       }}
     >
       {children}

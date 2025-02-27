@@ -19,6 +19,7 @@ export default function AddScoreForm({ onClose }: AddScoreFormProps) {
   const [selectedPlayer, setSelectedPlayer] = useState('')
   const [isVictory, setIsVictory] = useState(true)
   const [congo, setCongo] = useState(0)
+  const [passage, setPassage] = useState(0)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,14 +32,18 @@ export default function AddScoreForm({ onClose }: AddScoreFormProps) {
     }
 
     try {
-      await addScore({
+      const scoreData = {
         playerId: parseInt(selectedPlayer),
         isVictory,
-        congo,
-      })
+        congo: Number(congo),
+        passage: Number(passage),
+      }
+      console.log('Envoi des données:', scoreData)
+      await addScore(scoreData)
       onClose()
     } catch (error) {
-      setError('Une erreur est survenue lors de l\'ajout du score')
+      console.error('Erreur lors de l\'ajout du score:', error)
+      setError(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'ajout du score')
     }
   }
 
@@ -100,16 +105,37 @@ export default function AddScoreForm({ onClose }: AddScoreFormProps) {
 
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2">
-              Congo (0 ou 1)
+              Congo
             </label>
-            <select
+            <div className="flex items-center">
+              <button
+                type="button"
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                  congo ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
+                onClick={() => setCongo(congo === 0 ? 1 : 0)}
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    congo ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+              <span className="ml-3 text-sm text-gray-500">{congo ? 'Oui' : 'Non'}</span>
+            </div>
+          </div>
+
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">
+              Passage
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={passage}
+              onChange={(e) => setPassage(Math.max(0, parseInt(e.target.value) || 0))}
               className="shadow border rounded w-full py-2 px-3 text-gray-700"
-              value={congo}
-              onChange={(e) => setCongo(parseInt(e.target.value))}
-            >
-              <option value={0}>0</option>
-              <option value={1}>1</option>
-            </select>
+            />
           </div>
 
           <div className="flex justify-end gap-4">

@@ -15,6 +15,7 @@ export async function GET() {
       const ratio = totalGames > 0 ? victories / totalGames : 0
       const points = (victories * 3) + (totalGames - victories)
       const congo = player.scores.reduce((total, score) => total + score.congo, 0)
+      const passage = player.scores.reduce((total, score) => total + score.passage, 0)
 
       return {
         ...player,
@@ -23,6 +24,7 @@ export async function GET() {
         ratio,
         points,
         congo,
+        passage,
       }
     })
 

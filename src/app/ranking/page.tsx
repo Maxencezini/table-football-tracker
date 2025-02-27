@@ -31,8 +31,9 @@ export default function RankingPage() {
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Points</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Victoires</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Défaites</th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Ratio</th>
                   <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Congo</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Passage</th>
+                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Ratio</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -70,10 +71,13 @@ export default function RankingPage() {
                       {player.defeats || 0}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {((player.ratio || 0) * 100).toFixed(1)}%
+                      {Math.floor(player.congo || 0)}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {Math.floor(player.congo || 0)}
+                      {player.passage || 0}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                      {((player.ratio || 0) * 100).toFixed(1)}%
                     </td>
                   </tr>
                 ))}

@@ -5,11 +5,24 @@ import Image from 'next/image';
 import { useState } from 'react';
 import Pagination from '@/components/Pagination';
 import { usePlayers } from '@/contexts/PlayersContext';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+
+type SortField = 'points' | 'victories' | 'defeats' | 'congo' | 'passage' | 'ratio';
+type SortDirection = 'asc' | 'desc' | null;
+
+interface SortState {
+  field: SortField | null;
+  direction: SortDirection;
+}
 
 export default function Home() {
   const { players, loading, resetScores } = usePlayers();
   const [currentPage, setCurrentPage] = useState(1);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [sortState, setSortState] = useState<SortState>({
+    field: 'points',
+    direction: 'desc',
+  });
   const itemsPerPage = 10;
 
   const handleResetScores = async () => {
@@ -21,14 +34,62 @@ export default function Home() {
     }
   };
 
+  const handleSort = (field: SortField) => {
+    setSortState(prevState => ({
+      field,
+      direction: 
+        prevState.field === field
+          ? prevState.direction === 'asc'
+            ? 'desc'
+            : prevState.direction === 'desc'
+              ? null
+              : 'asc'
+          : 'asc',
+    }));
+  };
+
+  const getSortedPlayers = () => {
+    if (!sortState.field || !sortState.direction) {
+      return players;
+    }
+
+    return [...players].sort((a, b) => {
+      const aValue = a[sortState.field!];
+      const bValue = b[sortState.field!];
+      
+      if (sortState.direction === 'asc') {
+        return aValue > bValue ? 1 : -1;
+      } else {
+        return aValue < bValue ? 1 : -1;
+      }
+    });
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortState.field !== field) {
+      return (
+        <div className="inline-flex flex-col ml-1 text-gray-400">
+          <ChevronUp className="h-3 w-3" />
+          <ChevronDown className="h-3 w-3 -mt-1" />
+        </div>
+      );
+    }
+    return sortState.direction === 'asc' ? (
+      <ChevronUp className="inline h-4 w-4 ml-1 text-blue-500" />
+    ) : (
+      <ChevronDown className="inline h-4 w-4 ml-1 text-blue-500" />
+    );
+  };
+
   if (loading) {
     return <div className="p-6">Chargement...</div>;
   }
 
-  const totalPages = Math.ceil(players.length / itemsPerPage);
+  const sortedPlayers = getSortedPlayers();
+  const totalPages = Math.ceil(sortedPlayers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentPlayers = players.slice(startIndex, endIndex);
+  const currentPlayers = sortedPlayers.slice(startIndex, endIndex);
 
   return (
     <div className="p-6">
@@ -73,11 +134,48 @@ export default function Home() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joueur</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Victoires</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Défaites</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ratio</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Points</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Congo</th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('points')}
+              >
+                Points
+                <SortIcon field="points" />
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('victories')}
+              >
+                Victoires
+                <SortIcon field="victories" />
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('defeats')}
+              >
+                Défaites
+                <SortIcon field="defeats" />
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('congo')}
+              >
+                Congo
+                <SortIcon field="congo" />
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('passage')}
+              >
+                Passage
+                <SortIcon field="passage" />
+              </th>
+              <th 
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none"
+                onClick={() => handleSort('ratio')}
+              >
+                Ratio
+                <SortIcon field="ratio" />
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -87,6 +185,7 @@ export default function Home() {
               const ratio = player.ratio || 0;
               const points = player.points || 0;
               const congo = player.congo || 0;
+              const passage = player.passage || 0;
 
               return (
                 <tr key={player.id}>
@@ -110,19 +209,22 @@ export default function Home() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {points}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {victories}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {defeats}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {(ratio * 100).toFixed(1)}%
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {points}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {Math.floor(congo)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {passage}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {(ratio * 100).toFixed(1)}%
                   </td>
                 </tr>
               );
