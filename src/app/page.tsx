@@ -19,6 +19,8 @@ export default function Home() {
   const { players, loading, resetScores } = usePlayers();
   const [currentPage, setCurrentPage] = useState(1);
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [sortState, setSortState] = useState<SortState>({
     field: 'points',
     direction: 'desc',
@@ -26,9 +28,15 @@ export default function Home() {
   const itemsPerPage = 10;
 
   const handleResetScores = async () => {
+    if (password !== 'DELETE') {
+      setPasswordError('Mot de passe incorrect');
+      return;
+    }
     try {
       await resetScores();
       setShowConfirmReset(false);
+      setPassword('');
+      setPasswordError('');
     } catch (error) {
       alert('Erreur lors de la réinitialisation des scores');
     }
@@ -105,25 +113,50 @@ export default function Home() {
       </div>
 
       {showConfirmReset && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
           <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Confirmer la réinitialisation</h2>
             <p className="mb-6 text-gray-600">
               Êtes-vous sûr de vouloir réinitialiser tous les scores ? Cette action est irréversible.
             </p>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowConfirmReset(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={handleResetScores}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-              >
-                Réinitialiser
-              </button>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Mot de passe
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError('');
+                  }}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  placeholder="Entrez le mot de passe"
+                />
+                {passwordError && (
+                  <p className="mt-1 text-sm text-red-600">{passwordError}</p>
+                )}
+              </div>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    setShowConfirmReset(false);
+                    setPassword('');
+                    setPasswordError('');
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleResetScores}
+                  className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                >
+                  Réinitialiser
+                </button>
+              </div>
             </div>
           </div>
         </div>

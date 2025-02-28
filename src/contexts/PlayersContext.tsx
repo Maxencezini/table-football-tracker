@@ -61,12 +61,58 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
   const [players, setPlayers] = useState<Player[]>([])
   const [loading, setLoading] = useState(true)
 
+  const updateNicknames = async (formattedPlayers: Player[]) => {
+    // Trouver les meilleurs joueurs pour chaque catégorie
+    const bestPoints = Math.max(...formattedPlayers.map(p => p.points))
+    const bestCongo = Math.max(...formattedPlayers.map(p => p.congo))
+    const bestPassage = Math.max(...formattedPlayers.map(p => p.passage))
+
+    // Pour chaque joueur, déterminer ses titres
+    for (const player of formattedPlayers) {
+      const titles = []
+      
+      if (player.points === bestPoints) titles.push('Point Master')
+      if (player.congo === bestCongo) titles.push('Pro Congo')
+      if (player.passage === bestPassage) titles.push('La chèvre')
+
+      const newNickname = titles.length > 0 ? titles.join(' / ') : null
+
+      // Ne mettre à jour que si le surnom a changé
+      if (newNickname !== player.nickname) {
+        try {
+          await fetch(`/api/players/${player.id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              nickname: newNickname,
+              victories: player.victories,
+              defeats: player.defeats,
+              congo: player.congo,
+              passage: player.passage,
+            }),
+          })
+        } catch (error) {
+          console.error('Erreur lors de la mise à jour du surnom:', error)
+        }
+      }
+    }
+  }
+
   const refreshPlayers = async () => {
     try {
       const response = await fetch('/api/players')
       const data = await response.json()
-      // Formater les données avant de les stocker
-      setPlayers(data.map(formatPlayerData))
+      const formattedPlayers = data.map(formatPlayerData)
+      
+      // Mettre à jour les surnoms avant de mettre à jour l'état
+      await updateNicknames(formattedPlayers)
+      
+      // Recharger les joueurs pour avoir les surnoms à jour
+      const updatedResponse = await fetch('/api/players')
+      const updatedData = await updatedResponse.json()
+      setPlayers(updatedData.map(formatPlayerData))
     } catch (error) {
       console.error('Erreur lors du chargement des joueurs:', error)
     } finally {
@@ -106,7 +152,10 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          nickname: null // Force le surnom à null car ils sont gérés automatiquement
+        }),
       })
 
       if (!response.ok) {

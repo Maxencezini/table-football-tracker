@@ -65,8 +65,8 @@ export default function Header() {
       )}
 
       {isAddingPlayer && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
             <h2 className="text-xl font-bold mb-4">Nouveau Joueur</h2>
             <form onSubmit={handleAddPlayer} className="space-y-4">
               <div>
@@ -85,20 +85,6 @@ export default function Header() {
               </div>
 
               <div>
-                <label htmlFor="nickname" className="block text-sm font-medium text-gray-700">
-                  Surnom (optionnel)
-                </label>
-                <input
-                  type="text"
-                  name="nickname"
-                  id="nickname"
-                  value={newPlayer.nickname}
-                  onChange={(e) => setNewPlayer({ ...newPlayer, nickname: e.target.value })}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
                 <label htmlFor="avatar" className="block text-sm font-medium text-gray-700">
                   URL de l'avatar (optionnel)
                 </label>
@@ -108,7 +94,7 @@ export default function Header() {
                   id="avatar"
                   value={newPlayer.avatar}
                   onChange={(e) => setNewPlayer({ ...newPlayer, avatar: e.target.value })}
-                  placeholder="https://example.com/avatar.jpg"
+                  placeholder="Merci de renseigner l'url de votre avatar slack"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>

@@ -108,7 +108,7 @@ export default function PlayersPage() {
                             type="url"
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
-                            placeholder="https://example.com/avatar.jpg"
+                            placeholder="Merci de renseigner l'url de votre image slack"
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">

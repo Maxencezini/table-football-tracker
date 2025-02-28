@@ -7,8 +7,8 @@ interface MatchTypeSelectorProps {
 
 export default function MatchTypeSelector({ onSelect, onClose }: MatchTypeSelectorProps) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full relative">
         <h2 className="text-xl font-bold mb-6 text-center">Sélectionner le type de match</h2>
         
         <div className="flex flex-col gap-4">

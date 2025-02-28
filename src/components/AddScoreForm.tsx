@@ -121,8 +121,8 @@ export default function AddScoreForm({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl mx-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-6xl mx-4 relative">
         <h2 className="text-xl font-bold mb-4 text-center">
           {matchType === '1v1' ? 'Match 1 contre 1' : 'Match 2 contre 2'}
         </h2>

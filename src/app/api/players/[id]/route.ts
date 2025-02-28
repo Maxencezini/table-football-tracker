@@ -45,6 +45,7 @@ export async function PATCH(
     const defeats = parseInt(body.defeats) || 0
     const congo = parseFloat(body.congo) || 0
     const passage = parseInt(body.passage) || 0
+    const nickname = body.nickname
 
     // Validation des valeurs
     if (victories < 0 || defeats < 0 || congo < 0 || passage < 0) {
@@ -52,6 +53,26 @@ export async function PATCH(
         { error: 'Les valeurs ne peuvent pas être négatives' },
         { status: 400 }
       )
+    }
+
+    // Vérifier que le joueur existe
+    const player = await prisma.player.findUnique({
+      where: { id },
+    })
+
+    if (!player) {
+      return NextResponse.json(
+        { error: 'Joueur non trouvé' },
+        { status: 404 }
+      )
+    }
+
+    // Mettre à jour le joueur si un surnom est fourni
+    if (nickname !== undefined) {
+      await prisma.player.update({
+        where: { id },
+        data: { nickname }
+      })
     }
 
     // Supprimer tous les scores existants
@@ -105,18 +126,6 @@ export async function PATCH(
       }
     }
 
-    // Vérifier que le joueur existe avant de créer les scores
-    const player = await prisma.player.findUnique({
-      where: { id },
-    })
-
-    if (!player) {
-      return NextResponse.json(
-        { error: 'Joueur non trouvé' },
-        { status: 404 }
-      )
-    }
-
     // Créer tous les scores en une seule opération
     if (scores.length > 0) {
       await prisma.score.createMany({
@@ -130,7 +139,8 @@ export async function PATCH(
         victories,
         defeats,
         congo,
-        passage
+        passage,
+        nickname
       }
     })
   } catch (error) {
