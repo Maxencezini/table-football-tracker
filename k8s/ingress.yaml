@@ -19,5 +19,5 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - app-babyfoot.molecule-science.com
+    - babyfoot.molecule-science.com
     secretName: app-babyfoot-secret
