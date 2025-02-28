@@ -4,9 +4,11 @@ npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# Next.js
+# Build
 .next
 out
+build
+dist
 
 # Environnement
 .env
@@ -17,7 +19,22 @@ out
 
 # Système
 .DS_Store
-*.pem
+Thumbs.db
+
+# Base de données SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Divers
+.git
+.gitignore
+README.md
+.vscode
+.idea
+*.log
+coverage
+.vercel
 
 # Debug
 npm-debug.log*
@@ -25,19 +42,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # IDE
-.idea
-.vscode
 *.swp
 *.swo
 
 # Tests
-coverage
-.nyc_output
-
-# Build
-dist
-build
-
-# Base de données
-prisma/*.db
-prisma/*.db-journal 
+.nyc_output 
