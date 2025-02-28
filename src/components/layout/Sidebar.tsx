@@ -1,9 +1,10 @@
 'use client';
 
-import { Home, Users, Award } from 'lucide-react';
+import { Home, Users, Award, Maximize, Minimize } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import logo from '@/assets/img/depositphotos_346408626-stock-illustration-vector-red-player-table-football.jpg';
 
 const navigation = [
@@ -14,6 +15,28 @@ const navigation = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!isFullscreen) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch (error) {
+      console.error('Erreur lors du basculement en mode plein écran:', error);
+    }
+  };
 
   return (
     <div className="h-screen sticky top-0 flex flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
@@ -60,6 +83,19 @@ export default function Sidebar() {
                 );
               })}
             </ul>
+          </li>
+          <li className="-mx-2">
+            <button
+              onClick={toggleFullscreen}
+              className="group flex w-full gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+            >
+              {isFullscreen ? (
+                <Minimize className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-blue-600" />
+              ) : (
+                <Maximize className="h-6 w-6 shrink-0 text-gray-400 group-hover:text-blue-600" />
+              )}
+              {isFullscreen ? 'Quitter le plein écran' : 'Plein écran'}
+            </button>
           </li>
         </ul>
       </nav>
