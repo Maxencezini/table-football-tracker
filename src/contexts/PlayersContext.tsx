@@ -104,6 +104,13 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch('/api/players')
       const data = await response.json()
+      
+      if (!Array.isArray(data)) {
+        console.error('La réponse de l\'API n\'est pas un tableau:', data)
+        setPlayers([])
+        return
+      }
+
       const formattedPlayers = data.map(formatPlayerData)
       
       // Mettre à jour les surnoms avant de mettre à jour l'état
@@ -112,9 +119,17 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
       // Recharger les joueurs pour avoir les surnoms à jour
       const updatedResponse = await fetch('/api/players')
       const updatedData = await updatedResponse.json()
+
+      if (!Array.isArray(updatedData)) {
+        console.error('La réponse de l\'API n\'est pas un tableau:', updatedData)
+        setPlayers([])
+        return
+      }
+
       setPlayers(updatedData.map(formatPlayerData))
     } catch (error) {
       console.error('Erreur lors du chargement des joueurs:', error)
+      setPlayers([])
     } finally {
       setLoading(false)
     }
@@ -162,6 +177,26 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
         throw new Error('Erreur lors de la création du joueur')
       }
 
+      const newPlayer = await response.json()
+
+      // Générer les paires pour le nouveau joueur
+      const existingPlayers = await fetch('/api/players').then(res => res.json())
+      for (const existingPlayer of existingPlayers) {
+        if (existingPlayer.id !== newPlayer.id) {
+          const [player1Id, player2Id] = [newPlayer.id, existingPlayer.id].sort((a, b) => a - b)
+          await fetch('/api/pairs', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              player1Id,
+              player2Id,
+            }),
+          })
+        }
+      }
+
       await refreshPlayers()
     } catch (error) {
       console.error('Erreur:', error)
@@ -195,6 +230,11 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error('Erreur lors de la réinitialisation des scores')
       }
+
+      // Réinitialiser aussi les statistiques des paires
+      await fetch('/api/pairs/reset', {
+        method: 'POST',
+      })
 
       await refreshPlayers()
     } catch (error) {

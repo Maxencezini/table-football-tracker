@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, Users, Award, Maximize, Minimize } from 'lucide-react';
+import { Home, Users, Award, Maximize, Minimize, Users2 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Home', href: '/', icon: Home },
   { name: 'Joueurs', href: '/players', icon: Users },
   { name: 'Classement', href: '/ranking', icon: Award },
+  { name: 'Paires', href: '/pairs', icon: Users2 },
 ];
 
 export default function Sidebar() {

@@ -80,6 +80,26 @@ export default function AddScoreForm({ onClose }: { onClose: () => void }) {
     }
   }
 
+  const updatePairStats = async (player1Id: number, player2Id: number, isVictory: boolean, congo: number, passage: number) => {
+    try {
+      await fetch('/api/pairs', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          player1Id,
+          player2Id,
+          isVictory,
+          congo,
+          passage,
+        }),
+      })
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des statistiques de la paire:', error)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -108,6 +128,27 @@ export default function AddScoreForm({ onClose }: { onClose: () => void }) {
           passage: player.passage,
         })
       ))
+
+      // Si c'est un match 2v2, mettre à jour les statistiques des paires
+      if (matchType === '2v2') {
+        // Mettre à jour les stats pour la paire de l'équipe 1
+        await updatePairStats(
+          parseInt(team1Players[0].selectedPlayer),
+          parseInt(team1Players[1].selectedPlayer),
+          team1Players[0].isVictory,
+          team1Players[0].congo + team1Players[1].congo,
+          team1Players[0].passage + team1Players[1].passage
+        )
+
+        // Mettre à jour les stats pour la paire de l'équipe 2
+        await updatePairStats(
+          parseInt(team2Players[0].selectedPlayer),
+          parseInt(team2Players[1].selectedPlayer),
+          team2Players[0].isVictory,
+          team2Players[0].congo + team2Players[1].congo,
+          team2Players[0].passage + team2Players[1].passage
+        )
+      }
 
       onClose()
     } catch (error) {

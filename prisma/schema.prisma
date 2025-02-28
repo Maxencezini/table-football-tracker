@@ -15,22 +15,44 @@ datasource db {
 
 model Player {
   id        Int      @id @default(autoincrement())
-  pseudo    String
+  pseudo    String   @unique
+  avatar    String?
   nickname  String?
-  avatar    String   @default("/default-avatar.png")
-  scores    Score[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Relations
+  scores        Score[]      @relation("PlayerScores")
+  pairsAsPlayer1 PlayerPair[] @relation("Player1")
+  pairsAsPlayer2 PlayerPair[] @relation("Player2")
 }
 
 model Score {
   id        Int      @id @default(autoincrement())
   playerId  Int
-  player    Player   @relation(fields: [playerId], references: [id])
+  player    Player   @relation("PlayerScores", fields: [playerId], references: [id])
   isVictory Boolean
-  congo     Float    @default(0)
+  congo     Int      @default(0)
   passage   Int      @default(0)
-  date      DateTime @default(now())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PlayerPair {
+  id        Int      @id @default(autoincrement())
+  player1Id Int
+  player2Id Int
+  victories Int      @default(0)
+  defeats   Int      @default(0)
+  congo     Int      @default(0)
+  passage   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations avec Player
+  player1   Player   @relation("Player1", fields: [player1Id], references: [id])
+  player2   Player   @relation("Player2", fields: [player2Id], references: [id])
+
+  // Index unique pour éviter les doublons de paires
+  @@unique([player1Id, player2Id])
 }
