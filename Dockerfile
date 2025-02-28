@@ -5,7 +5,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Installation des dépendances système nécessaires
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat python3 make g++ vips-dev
 
 # Copie des fichiers de dépendances
 COPY package*.json ./
@@ -14,15 +14,18 @@ COPY tsconfig*.json ./
 COPY next.config.js ./
 COPY tailwind.config.ts ./
 COPY postcss.config.js ./
+COPY .eslintrc.json ./
 
-# Installation des dépendances avec un cache optimisé
-RUN npm ci
+# Installation des dépendances
+RUN npm install
+RUN npm install --platform=linuxmusl --arch=x64 sharp
 
 # Copie du reste des fichiers du projet
 COPY . .
 
 # Génération du client Prisma et build de l'application
 RUN npx prisma generate
+ENV NODE_ENV=production
 RUN npm run build
 
 # Étape de production
@@ -35,7 +38,7 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Installation des dépendances nécessaires pour SQLite et autres utilitaires
-RUN apk add --no-cache sqlite curl
+RUN apk add --no-cache sqlite curl vips-dev
 
 # Création d'un utilisateur non-root
 RUN addgroup --system --gid 1001 nodejs && \
@@ -49,6 +52,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/sharp ./node_modules/sharp
 
 # Création des répertoires nécessaires et attribution des permissions
 RUN mkdir -p /app/prisma /app/public/assets/img && \
