@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Settings, Plus, Download, Filter } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import AddScoreForm from '@/components/AddScoreForm';
 import { usePlayers } from '@/contexts/PlayersContext';
@@ -22,7 +22,7 @@ export default function Header() {
     }
   };
 
-  const handleAddScore = async (data: { playerId: number; isVictory: boolean; congo: number }) => {
+  const handleAddScore = async (data: { playerId: number; isVictory: boolean; congo: number; passage: number }) => {
     try {
       await addScore(data);
       setIsAddingScore(false);
@@ -33,61 +33,26 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex h-16 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-        <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-          {/* Search */}
-          <div className="relative flex flex-1 items-center">
-            <Search className="pointer-events-none absolute left-3 h-5 w-5 text-gray-400" aria-hidden="true" />
-            <input
-              type="search"
-              placeholder="Rechercher..."
-              className="h-10 w-full rounded-md border-0 bg-gray-50 pl-10 pr-3 text-sm leading-6 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-600"
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-x-4 lg:gap-x-6">
-            {/* Buttons */}
-            <div className="flex items-center gap-x-4">
-              <button
-                type="button"
-                onClick={() => setIsAddingScore(true)}
-                className="inline-flex items-center gap-x-2 rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-              >
-                <Plus className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                Ajouter un score
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsAddingPlayer(true)}
-                className="inline-flex items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                <Plus className="-ml-0.5 h-5 w-5" aria-hidden="true" />
-                Ajouter un joueur
-              </button>
-            </div>
-
-            {/* Icons */}
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <button
-                type="button"
-                className="rounded-md p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-500"
-              >
-                <Filter className="h-6 w-6" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="rounded-md p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-500"
-              >
-                <Download className="h-6 w-6" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="rounded-md p-1 text-gray-400 hover:bg-gray-50 hover:text-gray-500"
-              >
-                <Settings className="h-6 w-6" aria-hidden="true" />
-              </button>
-            </div>
+      <div className="flex h-16 items-center border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+        <div className="flex flex-1 items-center justify-between">
+          <h1 className="text-xl font-semibold text-gray-900 font-[var(--font-roboto)] uppercase">Baby-foot Molecule</h1>
+          <div className="flex gap-x-4">
+            <button
+              type="button"
+              onClick={() => setIsAddingScore(true)}
+              className="inline-flex items-center gap-x-2 rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            >
+              <Plus className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+              Ajouter un score
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAddingPlayer(true)}
+              className="inline-flex items-center gap-x-2 rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            >
+              <Plus className="-ml-0.5 h-5 w-5" aria-hidden="true" />
+              Ajouter un joueur
+            </button>
           </div>
         </div>
       </div>
@@ -95,9 +60,7 @@ export default function Header() {
       {/* Formulaires */}
       {isAddingScore && (
         <AddScoreForm
-          players={players}
           onClose={() => setIsAddingScore(false)}
-          onSubmit={handleAddScore}
         />
       )}
 

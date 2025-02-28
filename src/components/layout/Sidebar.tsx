@@ -7,7 +7,7 @@ import Image from 'next/image';
 import logo from '@/assets/img/depositphotos_346408626-stock-illustration-vector-red-player-table-football.jpg';
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: Home },
+  { name: 'Home', href: '/', icon: Home },
   { name: 'Joueurs', href: '/players', icon: Users },
   { name: 'Classement', href: '/ranking', icon: Award },
 ];

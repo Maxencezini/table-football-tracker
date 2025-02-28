@@ -2,13 +2,13 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-interface Score {
+export interface Score {
   isVictory: boolean
   congo: number
   passage: number
 }
 
-interface Player {
+export interface Player {
   id: number
   pseudo: string
   nickname?: string | null

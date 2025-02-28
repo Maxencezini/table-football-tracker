@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Roboto } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import Header from "@/components/layout/Header";
 import { PlayersProvider } from "@/contexts/PlayersContext";
 
 const inter = Inter({ subsets: ["latin"] });
+const roboto = Roboto({ 
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--font-roboto',
+});
 
 export const metadata: Metadata = {
   title: "Team Performance Dashboard",
@@ -19,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className="h-full">
-      <body className={`${inter.className} h-full`}>
+      <body className={`${inter.className} ${roboto.variable} h-full`}>
         <PlayersProvider>
           <div className="min-h-screen">
             <div className="flex min-h-screen">
