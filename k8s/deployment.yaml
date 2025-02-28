@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-babyfoot
+  labels:
+    app: app-babyfoot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-babyfoot
+  template:
+    metadata:
+      labels:
+        app: app-babyfoot
+    spec:
+      containers:
+      - name: app-babyfoot
+        image: kidcudel/table-football-tracker
+        ports:
+        - name: http
+          containerPort: 3000
+        volumeMounts:
+        - mountPath: /app/prisma/
+          name: app-babyfoot
+      volumes:
+      - name: app-babyfoot
+        persistentVolumeClaim:
+          claimName: app-babyfoot
