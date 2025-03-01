@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
@@ -11,6 +10,7 @@ export async function POST(request: Request) {
 
     // Validation des données requises
     if (!playerId) {
+      console.error('ID du joueur manquant')
       return NextResponse.json(
         { error: 'L\'ID du joueur est requis' },
         { status: 400 }
@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     }
 
     if (typeof isVictory !== 'boolean') {
+      console.error('Statut de victoire invalide:', isVictory)
       return NextResponse.json(
         { error: 'Le statut de victoire doit être un booléen' },
         { status: 400 }
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
 
     // Validation de la valeur de congo
     if (typeof congo !== 'number' || congo < 0 || congo > 1) {
+      console.error('Valeur de congo invalide:', congo)
       return NextResponse.json(
         { error: 'La valeur de congo doit être un nombre entre 0 et 1' },
         { status: 400 }
@@ -34,6 +36,7 @@ export async function POST(request: Request) {
 
     // Validation de la valeur de passage
     if (typeof passage !== 'number' || passage < 0) {
+      console.error('Valeur de passage invalide:', passage)
       return NextResponse.json(
         { error: 'La valeur de passage doit être un nombre supérieur ou égal à 0' },
         { status: 400 }
@@ -46,6 +49,7 @@ export async function POST(request: Request) {
     })
 
     if (!player) {
+      console.error('Joueur non trouvé:', playerId)
       return NextResponse.json(
         { error: 'Joueur non trouvé' },
         { status: 404 }
@@ -53,25 +57,22 @@ export async function POST(request: Request) {
     }
 
     try {
-      const scoreData: Prisma.ScoreUncheckedCreateInput = {
-        playerId,
-        isVictory,
-        congo,
-        passage,
-        date: new Date(),
-      }
-
       const score = await prisma.score.create({
-        data: scoreData
+        data: {
+          playerId,
+          isVictory,
+          congo,
+          passage,
+        }
       })
 
-      console.log('Score créé:', score)
+      console.log('Score créé avec succès:', score)
       return NextResponse.json({ 
         message: 'Score ajouté avec succès',
         score 
       })
     } catch (dbError) {
-      console.error('Erreur Prisma:', dbError)
+      console.error('Erreur Prisma détaillée:', dbError)
       return NextResponse.json(
         { error: 'Erreur lors de la création du score dans la base de données' },
         { status: 500 }

@@ -137,6 +137,7 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
 
   const addScore = async (data: { playerId: number; isVictory: boolean; congo: number; passage: number }) => {
     try {
+      console.log('Envoi des données du score:', data)
       const response = await fetch('/api/scores', {
         method: 'POST',
         headers: {
@@ -147,7 +148,7 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('Réponse de l\'API:', errorData)
+        console.error('Erreur de réponse:', response.status, errorData)
         throw new Error(errorData.error || 'Erreur lors de l\'ajout du score')
       }
 
@@ -155,7 +156,7 @@ export function PlayersProvider({ children }: { children: ReactNode }) {
       console.log('Score ajouté avec succès:', result)
       await refreshPlayers()
     } catch (error) {
-      console.error('Erreur détaillée:', error)
+      console.error('Erreur lors de l\'ajout du score:', error)
       throw error
     }
   }

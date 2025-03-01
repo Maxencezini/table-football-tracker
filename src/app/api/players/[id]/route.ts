@@ -8,20 +8,34 @@ export async function DELETE(
   try {
     const id = parseInt(params.id)
 
-    // Supprimer d'abord tous les scores associés au joueur
+    // Supprimer d'abord les paires associées au joueur
+    await prisma.playerPair.deleteMany({
+      where: {
+        OR: [
+          { player1Id: id },
+          { player2Id: id }
+        ]
+      }
+    })
+
+    // Supprimer ensuite tous les scores associés au joueur
     await prisma.score.deleteMany({
       where: { playerId: id },
     })
 
-    // Puis supprimer le joueur
+    // Enfin, supprimer le joueur
     await prisma.player.delete({
       where: { id },
     })
 
     return NextResponse.json({ message: 'Joueur supprimé avec succès' })
   } catch (error) {
+    console.error('Erreur détaillée lors de la suppression:', error)
     return NextResponse.json(
-      { error: 'Erreur lors de la suppression du joueur' },
+      { 
+        error: 'Erreur lors de la suppression du joueur',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     )
   }
@@ -45,7 +59,7 @@ export async function PATCH(
     const defeats = parseInt(body.defeats) || 0
     const congo = parseFloat(body.congo) || 0
     const passage = parseInt(body.passage) || 0
-    const nickname = body.nickname
+    const { nickname, pseudo, avatar } = body
 
     // Validation des valeurs
     if (victories < 0 || defeats < 0 || congo < 0 || passage < 0) {
@@ -67,11 +81,16 @@ export async function PATCH(
       )
     }
 
-    // Mettre à jour le joueur si un surnom est fourni
-    if (nickname !== undefined) {
+    // Mettre à jour les informations du joueur
+    const updateData: any = {}
+    if (nickname !== undefined) updateData.nickname = nickname
+    if (pseudo !== undefined) updateData.pseudo = pseudo
+    if (avatar !== undefined) updateData.avatar = avatar
+
+    if (Object.keys(updateData).length > 0) {
       await prisma.player.update({
         where: { id },
-        data: { nickname }
+        data: updateData
       })
     }
 
@@ -90,7 +109,7 @@ export async function PATCH(
         isVictory: false,
         congo,
         passage,
-        date: new Date(),
+        createdAt: new Date(),
       })
     } else {
       // Ajouter les victoires
@@ -100,7 +119,7 @@ export async function PATCH(
           isVictory: true,
           congo: 0,
           passage: 0,
-          date: new Date(),
+          createdAt: new Date(),
         })
       }
 
@@ -111,7 +130,7 @@ export async function PATCH(
           isVictory: false,
           congo: 0,
           passage: 0,
-          date: new Date(),
+          createdAt: new Date(),
         })
       }
 
@@ -140,7 +159,9 @@ export async function PATCH(
         defeats,
         congo,
         passage,
-        nickname
+        nickname,
+        pseudo,
+        avatar
       }
     })
   } catch (error) {

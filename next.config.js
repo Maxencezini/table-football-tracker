@@ -9,6 +9,12 @@ const nextConfig = {
       },
     ],
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+      allowedOrigins: ['localhost:3000', 'localhost:3001']
+    }
+  },
   typescript: {
     ignoreBuildErrors: true
   },

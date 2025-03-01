@@ -12,7 +12,7 @@ interface EditableCell {
 }
 
 export default function PlayersPage() {
-  const { players, deletePlayer, updatePlayerStats } = usePlayers();
+  const { players, deletePlayer, updatePlayerStats, refreshPlayers } = usePlayers();
   const [editingCell, setEditingCell] = useState<EditableCell | null>(null);
   const [editValue, setEditValue] = useState('');
   const [deletingPlayer, setDeletingPlayer] = useState<number | null>(null);
@@ -26,31 +26,57 @@ export default function PlayersPage() {
 
   const handleSave = async () => {
     if (!editingCell) return;
-    setError(null);
 
     try {
-      const player = players.find(p => p.id === editingCell.playerId);
-      if (!player) return;
+      const value = editValue;
+      const field = editingCell.field;
+      const playerId = editingCell.playerId;
 
-      if (['victories', 'defeats', 'congo', 'passage'].includes(editingCell.field)) {
-        const value = parseInt(editValue);
-        if (isNaN(value) || value < 0) {
-          setError('La valeur doit être un nombre positif');
-          return;
-        }
-
-        await updatePlayerStats(editingCell.playerId, {
-          victories: editingCell.field === 'victories' ? value : player.victories,
-          defeats: editingCell.field === 'defeats' ? value : player.defeats,
-          congo: editingCell.field === 'congo' ? value : player.congo,
-          passage: editingCell.field === 'passage' ? value : player.passage,
+      if (field === 'avatar' || field === 'pseudo' || field === 'nickname') {
+        const response = await fetch(`/api/players/${playerId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ [field]: value }),
         });
 
-        setEditingCell(null);
+        if (!response.ok) {
+          throw new Error('Erreur lors de la mise à jour');
+        }
+      } else {
+        const currentPlayer = players.find(p => p.id === playerId);
+        if (!currentPlayer) return;
+
+        const updates = {
+          victories: field === 'victories' ? parseInt(value) : currentPlayer.victories,
+          defeats: field === 'defeats' ? parseInt(value) : currentPlayer.defeats,
+          congo: field === 'congo' ? parseInt(value) : currentPlayer.congo,
+          passage: field === 'passage' ? parseInt(value) : currentPlayer.passage,
+        };
+
+        await updatePlayerStats(playerId, updates);
       }
+
+      setEditingCell(null);
+      setEditValue('');
+      await refreshPlayers();
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue');
-      console.error('Erreur lors de la mise à jour:', error);
+      console.error('Erreur lors de la sauvegarde:', error);
+      alert('Erreur lors de la sauvegarde');
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setEditingCell(null);
+      setEditValue('');
     }
   };
 
@@ -107,7 +133,8 @@ export default function PlayersPage() {
                           <input
                             type="url"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             placeholder="Merci de renseigner l'url de votre image slack"
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
@@ -142,7 +169,8 @@ export default function PlayersPage() {
                           <input
                             type="text"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">
@@ -165,32 +193,7 @@ export default function PlayersPage() {
                       )}
                     </td>
                     <td className="whitespace-nowrap px-3 py-4">
-                      {editingCell?.playerId === player.id && editingCell.field === 'nickname' ? (
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-                          />
-                          <button onClick={handleSave} className="text-green-600 hover:text-green-700">
-                            <Check className="h-5 w-5" />
-                          </button>
-                          <button onClick={() => setEditingCell(null)} className="text-red-600 hover:text-red-700">
-                            <X className="h-5 w-5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center space-x-2">
-                          <span>{player.nickname || '-'}</span>
-                          <button
-                            onClick={() => handleEdit(player.id, 'nickname', player.nickname || '')}
-                            className="text-gray-400 hover:text-gray-500"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                        </div>
-                      )}
+                      <span className="text-sm text-gray-500">{player.nickname || '-'}</span>
                     </td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{player.points}</td>
                     <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -200,7 +203,8 @@ export default function PlayersPage() {
                             type="number"
                             min="0"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">
@@ -229,7 +233,8 @@ export default function PlayersPage() {
                             type="number"
                             min="0"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">
@@ -258,7 +263,8 @@ export default function PlayersPage() {
                             type="number"
                             min="0"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">
@@ -287,7 +293,8 @@ export default function PlayersPage() {
                             type="number"
                             min="0"
                             value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
+                            onChange={handleChange}
+                            onKeyDown={handleKeyDown}
                             className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
                           />
                           <button onClick={handleSave} className="text-green-600 hover:text-green-700">

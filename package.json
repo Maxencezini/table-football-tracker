@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "DISABLE_ESLINT_PLUGIN=true NEXT_DISABLE_ESLINT=1 NEXT_IGNORE_TYPESCRIPT_ERRORS=true next build --no-lint",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "eslintConfig": {
     "extends": "next/core-web-vitals",

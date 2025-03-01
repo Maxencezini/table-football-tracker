@@ -102,58 +102,79 @@ export default function AddScoreForm({ onClose }: { onClose: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-
+    
     try {
-      // Valider que tous les joueurs sont sélectionnés
-      const allPlayers = [...team1Players, ...team2Players]
-      if (allPlayers.some(player => !player.selectedPlayer)) {
-        setError('Veuillez sélectionner tous les joueurs')
+      // Validation des données
+      if (matchType === null) {
+        alert('Veuillez sélectionner un type de match')
         return
       }
 
-      // Vérifier qu'un même joueur n'est pas sélectionné plusieurs fois
-      const selectedPlayerIds = allPlayers.map(player => player.selectedPlayer)
-      if (new Set(selectedPlayerIds).size !== selectedPlayerIds.length) {
-        setError('Un même joueur ne peut pas être sélectionné plusieurs fois')
+      const team1Valid = team1Players.every(player => player.selectedPlayer !== '')
+      const team2Valid = team2Players.every(player => player.selectedPlayer !== '')
+
+      if (!team1Valid || !team2Valid) {
+        alert('Veuillez sélectionner tous les joueurs')
         return
       }
 
-      // Ajouter les scores pour tous les joueurs
-      await Promise.all(allPlayers.map(player => 
-        addScore({
+      console.log('Soumission du formulaire avec les données:', {
+        matchType,
+        team1Players,
+        team2Players
+      })
+
+      // Création des scores pour l'équipe 1
+      const team1Promises = team1Players.map(player => {
+        if (!player.selectedPlayer) return null
+        return addScore({
           playerId: parseInt(player.selectedPlayer),
           isVictory: player.isVictory,
           congo: player.congo,
           passage: player.passage,
         })
-      ))
+      })
 
-      // Si c'est un match 2v2, mettre à jour les statistiques des paires
+      // Création des scores pour l'équipe 2
+      const team2Promises = team2Players.map(player => {
+        if (!player.selectedPlayer) return null
+        return addScore({
+          playerId: parseInt(player.selectedPlayer),
+          isVictory: !team1Players[0].isVictory, // Inverse du résultat de l'équipe 1
+          congo: player.congo,
+          passage: player.passage,
+        })
+      })
+
+      // Attendre que tous les scores soient créés
+      await Promise.all([...team1Promises, ...team2Promises].filter(Boolean))
+
+      // Mise à jour des statistiques des paires si c'est un match 2v2
       if (matchType === '2v2') {
-        // Mettre à jour les stats pour la paire de l'équipe 1
+        const team1Ids = team1Players.map(p => parseInt(p.selectedPlayer))
+        const team2Ids = team2Players.map(p => parseInt(p.selectedPlayer))
+        
         await updatePairStats(
-          parseInt(team1Players[0].selectedPlayer),
-          parseInt(team1Players[1].selectedPlayer),
+          team1Ids[0],
+          team1Ids[1],
           team1Players[0].isVictory,
-          team1Players[0].congo + team1Players[1].congo,
+          Math.max(team1Players[0].congo, team1Players[1].congo),
           team1Players[0].passage + team1Players[1].passage
         )
-
-        // Mettre à jour les stats pour la paire de l'équipe 2
+        
         await updatePairStats(
-          parseInt(team2Players[0].selectedPlayer),
-          parseInt(team2Players[1].selectedPlayer),
-          team2Players[0].isVictory,
-          team2Players[0].congo + team2Players[1].congo,
+          team2Ids[0],
+          team2Ids[1],
+          !team1Players[0].isVictory,
+          Math.max(team2Players[0].congo, team2Players[1].congo),
           team2Players[0].passage + team2Players[1].passage
         )
       }
 
       onClose()
     } catch (error) {
-      console.error('Erreur lors de l\'ajout des scores:', error)
-      setError(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'ajout des scores')
+      console.error('Erreur lors de la soumission du formulaire:', error)
+      alert(error instanceof Error ? error.message : 'Une erreur est survenue lors de l\'ajout des scores')
     }
   }
 
